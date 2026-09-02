@@ -2,14 +2,16 @@ import tensorflow as tf
 import numpy as np
 import sys
 import os
+import argparse
 
 def main():
-    if len(sys.argv) < 2:
-        print("Usage: python test_model.py <path_to_image>")
-        print("Example: python test_model.py dataset/Tomato___Early_blight/image1.JPG")
-        return
+    parser = argparse.ArgumentParser(description='Test a tomato leaf disease image.')
+    parser.add_argument('image_path', help='Path to the image to test')
+    parser.add_argument('--threshold', type=float, default=0.6, help='Confidence threshold (default: 0.6)')
+    args = parser.parse_args()
 
-    image_path = sys.argv[1]
+    image_path = args.image_path
+    threshold = args.threshold
     
     if not os.path.exists(image_path):
         print(f"Error: Image '{image_path}' not found.")
@@ -43,19 +45,22 @@ def main():
     predictions = model.predict(img_array, verbose=0)
     score = predictions[0] # Our model outputs softmax probabilities directly
 
+    max_score = np.max(score)
     predicted_class = class_names[np.argmax(score)]
     
-    # Clean up the dataset folder name for human readability
-    # Example: 'Tomato___Septoria_leaf_spot' -> 'Tomato - Septoria Leaf Spot'
-    formatted_class = predicted_class.replace('___', ' - ').replace('_', ' ').title()
-    
-    confidence = 100 * np.max(score)
-
     print("\n" + "="*50)
     print(" 🌿 PREDICTION RESULT 🌿")
     print("="*50)
-    print(f"Diagnosis:  {formatted_class}")
-    print(f"Confidence: {confidence:.2f}%")
+    
+    if max_score < threshold:
+        print("Diagnosis:  Uncertain / Not a recognized tomato leaf disease")
+    else:
+        # Clean up the dataset folder name for human readability
+        # Example: 'Tomato___Septoria_leaf_spot' -> 'Tomato - Septoria Leaf Spot'
+        formatted_class = predicted_class.replace('___', ' - ').replace('_', ' ').title()
+        print(f"Diagnosis:  {formatted_class}")
+        
+    print(f"Confidence: {100 * max_score:.2f}%")
     print("="*50 + "\n")
 
 if __name__ == "__main__":
