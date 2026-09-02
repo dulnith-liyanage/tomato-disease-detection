@@ -1,0 +1,18 @@
+venv/
+__pycache__/
+.DS_Store
+
+# Ignore massive image datasets
+dataset/
+plantdoc_dataset/
+plantvillage_dataset/
+tomato_dataset/
+wild_test_images/
+
+# Ignore large trained model files
+*.keras
+*.h5
+*.tflite
+
+# Ignore temp files
+internet_test.jpg
